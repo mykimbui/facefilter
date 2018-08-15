@@ -92,6 +92,6 @@ function init_scene(initState){
 
 function callbackTrack(detectState){
   THREE.JeelizHelper.render(detectState, THREECAMERA);
-  console.log(detectState.detected);
+  // console.log(detectState.detected);
 }
 

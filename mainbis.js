@@ -6,40 +6,40 @@ function main(){
 
   //initialize Jeeliz Facefilter :
   JEEFACEFILTERAPI.init({
-      canvasId: 'matrixCanvas',
+    canvasId: 'matrixCanvas',
       //path of NNC.json, which is the neural network model:
       NNCpath: 'https://appstatic.jeeliz.com/faceFilter/',
       callbackReady: function(errCode, initState){
         if (errCode){
-            console.log('AN ERROR HAPPENS BRO =', errCode);
-            return;
+          console.log('AN ERROR HAPPENS BRO =', errCode);
+          return;
         }
         console.log('JEEFACEFILTER WORKS YEAH !');
         init_scene(initState);
       }, //end callbackReady()
 
       callbackTrack: callbackTrack
-  });
+    });
 }
 
 function init_scene(initState){
   var threeInstances=THREE.JeelizHelper.init(initState);
 
   //create the 20 degrees FoV camera:
-    var aspecRatio=initState.canvasElement.width / initState.canvasElement.height;
-    THREECAMERA=new THREE.PerspectiveCamera(20, aspecRatio, 0.1, 100);
+  var aspecRatio=initState.canvasElement.width / initState.canvasElement.height;
+  THREECAMERA=new THREE.PerspectiveCamera(20, aspecRatio, 0.1, 100);
 
     //create the background video texture :
     var video=document.createElement('video');
-  video.src='matrixRain.mp4';
-  video.setAttribute('loop', 'true');
-  video.setAttribute('preload', 'true');
-  video.setAttribute('autoplay', 'true');
-  var videoTexture = new THREE.VideoTexture( video );
-  videoTexture.magFilter=THREE.LinearFilter;
-  videoTexture.minFilter=THREE.LinearFilter;
+    video.src='swim.mp4';
+    video.setAttribute('loop', 'true');
+    video.setAttribute('preload', 'true');
+    video.setAttribute('autoplay', 'true');
+    var videoTexture = new THREE.VideoTexture( video );
+    videoTexture.magFilter=THREE.LinearFilter;
+    videoTexture.minFilter=THREE.LinearFilter;
 
-  threeInstances.videoMesh.material.uniforms.samplerVideo.value=videoTexture;
+    threeInstances.videoMesh.material.uniforms.samplerVideo.value=videoTexture;
 
 
   try{ //small trick otherwise Chrome sometimes do not start the video
@@ -61,7 +61,7 @@ function init_scene(initState){
 
     //creation the custom material:
     var maskMaterial=new THREE.ShaderMaterial({
-    vertexShader: "\n\
+      vertexShader: "\n\
       varying vec3 vNormalView, vPosition;\n\
       void main(void){\n\
         #include <beginnormal_vertex>\n\
@@ -69,10 +69,10 @@ function init_scene(initState){
         #include <begin_vertex>\n\
         #include <project_vertex>\n\
         vNormalView=vec3(viewMatrix*vec4(normalize( transformedNormal ),0.));\n\
-      vPosition=position;\n\
+        vPosition=position;\n\
       }",
 
-    fragmentShader: "precision lowp float;\n\
+      fragmentShader: "precision lowp float;\n\
       uniform vec2 resolution;\n\
       uniform sampler2D samplerWebcam, samplerVideo;\n\
       varying vec3 vNormalView, vPosition;\n\
@@ -82,23 +82,20 @@ function init_scene(initState){
         float isInsideFace=(1.-isTangeant)*(1.-isNeck);\n\
         vec2 uv=gl_FragCoord.xy/resolution;\n\
         vec3 colorWebcam=texture2D(samplerWebcam, uv).rgb;\n\
-        float colorWebcamVal=dot(colorWebcam, vec3(0.299,0.587,0.114));\n\
-        colorWebcam=colorWebcamVal*vec3(0.0,1.5,0.0);\n\
         vec3 refracted=refract(vec3(0.,0.,-1.), vNormalView, 0.3);\n\
-      vec2 uvRefracted=uv+0.1*refracted.xy;\n\
-      uvRefracted=mix(uv, uvRefracted, smoothstep(0.,1.,isInsideFace));\n\
+        vec2 uvRefracted=uv+0.1*refracted.xy;\n\
+        uvRefracted=mix(uv, uvRefracted, smoothstep(0.,1.,isInsideFace));\n\
         vec3 colorLineCode=texture2D(samplerVideo, uvRefracted).rgb;\n\
-        colorWebcam+=vec3(1.,1.,1.)*smoothstep(0.3,0.6,colorWebcamVal);\n\
         vec3 finalColor=colorWebcam*isInsideFace+colorLineCode;\n\
         gl_FragColor=vec4(finalColor, 1.); //1 for alpha channel\n\
         //gl_FragColor=vec4(isNeck, isTangeant, 0.,1.);\n\
       }",
 
-    uniforms:{
-      samplerWebcam: {value: THREE.JeelizHelper.get_threeVideoTexture()},
-      samplerVideo: {value: videoTexture},
-      resolution: {value: new THREE.Vector2(initState.canvasElement.width,
-                                               initState.canvasElement.height)}
+      uniforms:{
+        samplerWebcam: {value: THREE.JeelizHelper.get_threeVideoTexture()},
+        samplerVideo: {value: videoTexture},
+        resolution: {value: new THREE.Vector2(initState.canvasElement.width,
+         initState.canvasElement.height)}
       }
     });
 
