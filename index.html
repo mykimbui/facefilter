@@ -2,12 +2,67 @@
 <html>
 <head>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js"></script>
-  <script src='https://appstatic.jeeliz.com/faceFilter/jeelizFaceFilter.js'></script>
-  <script src="https://appstatic.jeeliz.com/faceFilter/JeelizThreejsHelper.js"></script>
+  <script src='jeelizFaceFilter.js'></script>
+  <script src="JeelizThreejsHelper.js"></script>
   <script src='mainbis.js'></script>
 </head>
 <body onload='main()' style='margin: 0px'>
   <canvas id='matrixCanvas' style='transform: rotateY(180deg);'></canvas>
+
+  <script id="vs" type="notjs">
+
+    // --------- START VERTEX SHADER ---------
+
+    // precision is needed in this case!
+    precision mediump float;
+
+
+    uniform float time;
+
+    varying vec3 norm;
+    varying vec3 pos;
+
+    void main() {
+    // note position in three.js is a vec3
+
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+    norm = normal;
+    pos = position;
+
+    //gl_Position.x += sin(time + position.y) * 0.1;
+    //gl_Position.y += cos(time + position.z) * 0.1;
+  }
+
+  // --------- END VERTEX SHADER ---------
+</script>
+
+<script id="fs" type="notjs">
+  // --------- START FRAGMENT SHADER ---------
+
+  precision mediump float;
+
+  uniform vec2 resolution;
+  uniform float time;
+
+  varying vec3 norm;
+  varying vec3 pos;
+
+  void main() {
+  //vec2 uv = gl_FragCoord.xy / resolution;
+  //vec3 c = fract(norm * 0.5 + 0.5 + pos);
+
+  float len1 = distance(pos, vec3(0.3, 2.0, 0.1));
+  float len2 = distance(pos, vec3(0.2, 6.0, 0.2));
+  float len3 = distance(pos, vec3(0.0, 0.3, 0.3));
+  vec3 c = vec3(fract(len1 * 2.1 + time * 3.0),fract(len2 * 1.1 + time * 1.0),fract(len3 * 0.3 + time * 1.0));
+    if (c.r > 0.5) {discard;}
+  gl_FragColor = vec4(c.grb, 1.0);
+}
+
+// --------- END FRAGMENT SHADER ---------
+</script>
 </body>
 </html>
 
